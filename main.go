@@ -1,63 +1,53 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
-	"encoding/json"
+
+	"github.com/labstack/echo/v4"
 )
 
-func setheaders(h http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request){
-		
-		w.Header().Set("Access-Control-Allow-Origin","*")
-    	w.Header().Set("Content-Type","application/json")
-    	w.Header().Set("Access-Control-Allow-Methods","POST,GET")
-    	w.Header().Set("Access-Control-Allow-Headers","Accept, Content-Type, Content-Length, Accept-Encoding")	
-	
-		h(w,r)
-	}	
-}
-func logger(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Method:",r.Method)
-		next(w,r)
+func setHeaders(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		c.Response().Header().Set("Access-Control-Allow-Origin", "*")
+		c.Response().Header().Set("Content-Type", "application/json")
+		c.Response().Header().Set("Access-Control-Allow-Methods", "POST,GET")
+		c.Response().Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding")
+		h(c)
+		return nil
 	}
 }
 
-func details(w http.ResponseWriter, r *http.Request) {
-	email := r.URL.Query().Get("email")
-	fmt.Println("Email:",email)
+type User struct {
+	ID         int    `json:"id" form:"id"`
+	FirstName  string `json:"firstName" form:"firstName"`
+	LastName   string `json:"lastName" form:"lastName"`
+	Email      string `json:"email" form:"email"`
+	CreateDate string `json:"createDate" form:"createDate"`
 }
 
-func home(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin","*")
-	w.Header().Set("Content-Type","application/json")
-	w.Header().Set("Access-Control-Allow-Methods","POST,GET")
-	w.Header().Set("Access-Control-Allow-Headers","Accept, Content-Type, Content-Length, Accept-Encoding")
+func addUser(c echo.Context) error {
+	u := &User{}
+	if err := c.Bind(u); err != nil {
+		return err
+	}
+	return c.JSON(http.StatusCreated, u)
+}
 
-	response, err := json.Marshal(&struct{
-		FirstName string
-		LastName string
-		Email string
-		DateOfBirth string
-	}{
-		FirstName: "Adriel",
-		LastName: "Artiza",
-		Email: "adriel.artiza@gmail.com",
-		DateOfBirth:"2019-08-10",
-	})
+func getUser(c echo.Context) error {
+	email := c.Param("email")
 
-	if err != nil {
-		panic(err)
+	response := &User{
+		ID:         142,
+		Email:      email,
+		CreateDate: "2019-08-24",
 	}
 
-	fmt.Fprint(w,string(response))
+	return c.JSON(http.StatusOK, response)
 }
 
 func main() {
-	http.HandleFunc("/user",logger(home))
-	http.HandleFunc("/details",setheaders(details))
-	if err := http.ListenAndServe(":3000",nil); err != nil {
-		panic(err)
-	}
+	e := echo.New()
+	e.GET("/users/:email", getUser)
+	e.POST("/users", addUser)
+	e.Logger.Fatal(e.Start(":3000"))
 }
