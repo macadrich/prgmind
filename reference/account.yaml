@@ -1,0 +1,236 @@
+openapi: 3.1.0
+info:
+  title: account
+  version: '1.0'
+servers:
+  - url: 'http://localhost:3000'
+    description: Account API
+paths:
+  '/user/{email}':
+    parameters:
+      - schema:
+          type: string
+        name: email
+        in: path
+        required: true
+    get:
+      summary: Get User Info by User ID
+      tags: []
+      responses:
+        '200':
+          description: User Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                Get User Alice Smith:
+                  value:
+                    id: 142
+                    firstName: Alice
+                    lastName: Smith
+                    email: alice.smith@gmail.com
+                    dateOfBirth: '1997-10-31'
+                    emailVerified: true
+                    signUpDate: '2019-08-24'
+        '404':
+          description: User Not Found
+      operationId: get-user-email
+      description: Retrieve the information of the user with the matching user email.
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: Email
+          description: user email address
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+            examples: {}
+        description: ''
+    patch:
+      summary: Update User Information
+      operationId: patch-users-userId
+      responses:
+        '200':
+          description: User Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                Updated User Rebecca Baker:
+                  value:
+                    id: 13
+                    firstName: Rebecca
+                    lastName: Baker
+                    email: rebecca@gmail.com
+                    dateOfBirth: '1985-10-02'
+                    emailVerified: false
+                    createDate: '2019-08-24'
+        '404':
+          description: User Not Found
+        '409':
+          description: Email Already Taken
+      description: Update the information of an existing user.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  description: 'If a new email is given, the user''s email verified property will be set to false.'
+                dateOfBirth:
+                  type: string
+            examples:
+              Update First Name:
+                value:
+                  firstName: Rebecca
+              Update Email:
+                value:
+                  email: rebecca@gmail.com
+              Update Last Name & Date of Birth:
+                value:
+                  lastName: Baker
+                  dateOfBirth: '1985-10-02'
+        description: Patch user properties to update.
+  /user:
+    post:
+      summary: Create New User
+      operationId: post-user
+      responses:
+        '200':
+          description: User Created
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  firstName:
+                    type: string
+                    minLength: 1
+                  lastName:
+                    type: string
+                    minLength: 1
+                  email:
+                    type: string
+                    minLength: 1
+                  createDate:
+                    type: string
+                    minLength: 1
+                required:
+                  - firstName
+                  - lastName
+                  - email
+                  - createDate
+                x-examples:
+                  example-1:
+                    firstName: Bob
+                    lastName: Fellow
+                    email: bob.fellow@gmail.com
+                    createDate: '1996-08-24'
+              examples:
+                Response:
+                  value:
+                    firstName: Bob
+                    lastName: Eve
+                    email: bob.eve@gmail.com
+                    createDate: '2021-06-02'
+        '400':
+          description: Missing Required Information
+        '409':
+          description: Email Already Taken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  minLength: 1
+                lastName:
+                  type: string
+                  minLength: 1
+                email:
+                  type: string
+                  minLength: 1
+              required:
+                - firstName
+                - lastName
+                - email
+              x-examples:
+                example-1:
+                  firstName: Bob
+                  lastName: Fellow
+                  email: bob.fellow@gmail.com
+            examples:
+              Add User:
+                value:
+                  firstName: string
+                  lastName: string
+                  email: string
+        description: Post the necessary fields for the API to create a new user.
+      description: Create a new user.
+components:
+  schemas:
+    User:
+      description: basic user information
+      type: object
+      properties:
+        id:
+          type: number
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        createDate:
+          type: string
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - createDate
+      x-examples:
+        example-1:
+          id: 234
+          firstName: adriel
+          lastName: artiza
+          email: adriel.artiza@ivedha.com
+          createDate: '2021-06-03'
+  responses: {}
+  examples:
+    GET-User:
+      value:
+        description: Get user details
+        type: User
+        properties:
+          firstName: string
+          lastName: string
+          email: string
+        required:
+          - email
+    POST-User:
+      value:
+        description: Add new user
+        type: User
+        properties:
+          id: number
+          email: string
+          firstName: string
+          lastName: string
+        required:
+          - id
+          - email
