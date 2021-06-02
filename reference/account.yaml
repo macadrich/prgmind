@@ -6,14 +6,13 @@ servers:
   - url: 'http://localhost:3000'
     description: Account API
 paths:
-  '/users/{userId}':
+  '/user/{email}':
     parameters:
       - schema:
-          type: integer
-        name: userId
+          type: string
+        name: email
         in: path
         required: true
-        description: Id of an existing user.
     get:
       summary: Get User Info by User ID
       tags: []
@@ -36,8 +35,8 @@ paths:
                     signUpDate: '2019-08-24'
         '404':
           description: User Not Found
-      operationId: get-users-userId
-      description: Retrieve the information of the user with the matching user ID.
+      operationId: get-user-email
+      description: Retrieve the information of the user with the matching user email.
       parameters:
         - schema:
             type: string
@@ -112,17 +111,39 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-              examples:
-                New User Bob Fellow:
-                  value:
-                    id: 12
+                description: ''
+                type: object
+                properties:
+                  firstName:
+                    type: string
+                    minLength: 1
+                  lastName:
+                    type: string
+                    minLength: 1
+                  email:
+                    type: string
+                    minLength: 1
+                  createDate:
+                    type: string
+                    minLength: 1
+                required:
+                  - firstName
+                  - lastName
+                  - email
+                  - createDate
+                x-examples:
+                  example-1:
                     firstName: Bob
                     lastName: Fellow
                     email: bob.fellow@gmail.com
-                    dateOfBirth: '1996-08-24'
-                    emailVerified: false
-                    createDate: '2020-11-18'
+                    createDate: '1996-08-24'
+              examples:
+                Response:
+                  value:
+                    firstName: Bob
+                    lastName: Eve
+                    email: bob.eve@gmail.com
+                    createDate: '2021-06-02'
         '400':
           description: Missing Required Information
         '409':
@@ -131,65 +152,85 @@ paths:
         content:
           application/json:
             schema:
+              description: ''
               type: object
               properties:
                 firstName:
                   type: string
+                  minLength: 1
                 lastName:
                   type: string
+                  minLength: 1
                 email:
                   type: string
-                dateOfBirth:
-                  type: string
-                  format: date
+                  minLength: 1
               required:
                 - firstName
                 - lastName
                 - email
-                - dateOfBirth
-            examples:
-              Create User Bob Fellow:
-                value:
+              x-examples:
+                example-1:
                   firstName: Bob
                   lastName: Fellow
                   email: bob.fellow@gmail.com
-                  dateOfBirth: '1996-08-24'
+            examples:
+              Add User:
+                value:
+                  firstName: string
+                  lastName: string
+                  email: string
         description: Post the necessary fields for the API to create a new user.
       description: Create a new user.
 components:
   schemas:
     User:
-      title: User
+      description: basic user information
       type: object
-      description: ''
-      examples:
-        - id: 142
-          firstName: Alice
-          lastName: Smith
-          email: alice.smith@gmail.com
-          dateOfBirth: '1997-10-31'
-          emailVerified: true
-          signUpDate: '2019-08-24'
       properties:
         id:
-          type: integer
-          description: Unique identifier for the given user.
+          type: number
+        firstName:
+          type: string
+        lastName:
+          type: string
         email:
           type: string
-          format: email
         createDate:
           type: string
-          format: date
-          description: The date that the user was created.
       required:
         - id
+        - firstName
+        - lastName
         - email
+        - createDate
       x-examples:
         example-1:
-          id: 142
-          firstName: Alice
-          lastName: Smith
-          email: alice.smith@gmail.com
-          dateOfBirth: '1997-10-31'
-          emailVerified: true
-          signUpDate: '2019-08-24'
+          id: 234
+          firstName: adriel
+          lastName: artiza
+          email: adriel.artiza@ivedha.com
+          createDate: '2021-06-03'
+  responses: {}
+  examples:
+    GET-User:
+      value:
+        description: Get user details
+        type: User
+        properties:
+          firstName: string
+          lastName: string
+          email: string
+        required:
+          - email
+    POST-User:
+      value:
+        description: Add new user
+        type: User
+        properties:
+          id: number
+          email: string
+          firstName: string
+          lastName: string
+        required:
+          - id
+          - email
